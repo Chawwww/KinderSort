@@ -49,6 +49,34 @@ Output/
 4. 点击 **Start Sorting**。
 5. 查看完成摘要并打开输出目录确认结果。
 
+完整图文使用手册：[`guidebook.md`](guidebook.md)
+
+## 界面截图步骤
+
+### 1）程序启动界面
+
+![KinderSort 启动界面](guidebook_assets/01_launch.png)
+
+### 2）已选择参考照片目录
+
+![已选择参考照片目录](guidebook_assets/02_reference_selected.png)
+
+### 3）已选择活动照片目录
+
+![已选择活动照片目录](guidebook_assets/03_events_selected.png)
+
+### 4）三个目录都已设置完成
+
+![三个目录已设置完成](guidebook_assets/04_all_folders_set.png)
+
+### 5）正在整理照片
+
+![正在整理照片](guidebook_assets/05_sorting_in_progress.png)
+
+### 6）整理完成摘要
+
+![整理完成摘要](guidebook_assets/06_sorting_complete.png)
+
 ## 关键行为说明
 
 - 人脸匹配阈值为 `0.5`（偏严格，减少误匹配）。

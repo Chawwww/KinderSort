@@ -49,6 +49,34 @@ Output/
 4. Click **Start Sorting**.
 5. Review the summary and open the Output folder.
 
+Full illustrated teacher guide: [`guidebook.md`](guidebook.md)
+
+## Screenshot walkthrough
+
+### 1) App launch
+
+![KinderSort launch](guidebook_assets/01_launch.png)
+
+### 2) Reference folder selected
+
+![Reference folder selected](guidebook_assets/02_reference_selected.png)
+
+### 3) Events folder selected
+
+![Events folder selected](guidebook_assets/03_events_selected.png)
+
+### 4) All folders ready
+
+![All folders set](guidebook_assets/04_all_folders_set.png)
+
+### 5) Sorting in progress
+
+![Sorting in progress](guidebook_assets/05_sorting_in_progress.png)
+
+### 6) Sorting complete summary
+
+![Sorting complete](guidebook_assets/06_sorting_complete.png)
+
 ## Important behavior
 
 - Distance threshold is `0.5` (strict matching to reduce false positives).
