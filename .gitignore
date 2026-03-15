@@ -1,0 +1,13 @@
+# Python cache / env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+
+# Windows packaging output
+WinInstaller/
+*.exe
