@@ -1,98 +1,132 @@
 # KinderSort — Student Photo Organiser
 
+[![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/lerlerchan/KinderSort/releases)
+[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Offline](https://img.shields.io/badge/runs-offline-brightgreen?logo=shield&logoColor=white)](https://github.com/lerlerchan/KinderSort)
+[![CPU Only](https://img.shields.io/badge/GPU-not_required-orange)](https://github.com/lerlerchan/KinderSort)
+[![Release](https://img.shields.io/github/v/release/lerlerchan/KinderSort?color=blue&logo=github)](https://github.com/lerlerchan/KinderSort/releases)
+[![Download EXE](https://img.shields.io/badge/download-.exe-success?logo=windows)](https://github.com/lerlerchan/KinderSort/releases)
+
 [中文说明 (简体)](README.zh-CN.md)
 
-KinderSort is an offline desktop app for kindergarten teachers. It scans event photos, matches student faces, and copies each photo into the correct student folder automatically.
+KinderSort is an offline desktop app for kindergarten teachers. It scans event photos, matches student faces, and copies each photo into the correct student folder automatically — no internet connection, no coding knowledge required.
+
+---
 
 ## Highlights
 
-- Fully offline (no cloud upload required)
-- CPU-only face recognition (`face_recognition` + `dlib`)
-- Simple `tkinter` GUI for non-technical users
-- Group photos are copied to all matched students
-- Unmatched photos are copied to `_unmatched`
-- Detailed log file written to `kindersort_log.txt`
+| Feature | Detail |
+|---|---|
+| Fully offline | No cloud upload, no internet required |
+| CPU-only | Works on any Windows PC without a GPU |
+| Simple GUI | Point-and-click, no terminal needed |
+| Group photo support | One photo copied to all matched students |
+| Safe operation | Files are **copied**, never moved or deleted |
+| Audit trail | Detailed log written to `kindersort_log.txt` |
+
+---
 
 ## Who this is for
 
 - Teachers who need to organise large batches of student photos quickly
 - Schools that require local/offline processing for privacy
 
-## Input folder structure
+---
 
-You choose three folders in the app:
+## Quick Start (Teachers)
 
-1. **Reference Photos**: one clear front-facing photo per student, file name = student name  
-   Example: `Ali.jpg`, `Siti.png`, `Kumar.jpeg`
-2. **Events Folder**: contains event subfolders with mixed photos  
-   Example: `Sports_Day/`, `Concert/`, `Field_Trip/`
-3. **Output Folder**: destination for sorted results
+1. Download `KinderSort.exe` from the [**Releases**](https://github.com/lerlerchan/KinderSort/releases) page
+2. Double-click `KinderSort.exe` — no installation needed
+3. Select the three folders (Reference / Events / Output)
+4. Click **Start Sorting**
+5. Review the summary and open the Output folder
 
-## Output structure
+Full illustrated teacher guide: [`guidebook.md`](guidebook.md)
+
+---
+
+## Screenshot Walkthrough
+
+| Step | Screenshot |
+|---|---|
+| 1. App launch | ![KinderSort launch](guidebook_assets/01_launch.png) |
+| 2. Reference folder selected | ![Reference folder selected](guidebook_assets/02_reference_selected.png) |
+| 3. Events folder selected | ![Events folder selected](guidebook_assets/03_events_selected.png) |
+| 4. All folders ready | ![All folders set](guidebook_assets/04_all_folders_set.png) |
+| 5. Sorting in progress | ![Sorting in progress](guidebook_assets/05_sorting_in_progress.png) |
+| 6. Sorting complete | ![Sorting complete](guidebook_assets/06_sorting_complete.png) |
+
+---
+
+## Folder Setup
+
+You choose three folders inside the app:
+
+1. **Reference Photos** — one clear front-facing photo per student, file name = student name
+   ```
+   reference/
+     Ali.jpg
+     Siti.png
+     Kumar.jpeg
+   ```
+
+2. **Events Folder** — subfolders of mixed event photos
+   ```
+   events/
+     Sports_Day/
+     Concert/
+     Field_Trip/
+   ```
+
+3. **Output Folder** — where sorted results are written
+
+---
+
+## Output Structure
 
 ```text
 Output/
   Ali/
     Sports_Day__IMG_001.jpg
+    Concert__IMG_045.jpg
   Siti/
-    Sports_Day__IMG_001.jpg
+    Sports_Day__IMG_001.jpg    ← same photo, Siti was also in it
+    Field_Trip__IMG_023.jpg
   _unmatched/
     blurry_photo.jpg
+    no_face_detected.jpg
   kindersort_log.txt
 ```
 
-## How to use (Teacher quick start)
+---
 
-1. Download `KinderSort.exe` from the project **Releases** page.
-2. Double-click `KinderSort.exe`.
-3. Select the three folders (Reference / Events / Output).
-4. Click **Start Sorting**.
-5. Review the summary and open the Output folder.
+## Important Behaviour
 
-Full illustrated teacher guide: [`guidebook.md`](guidebook.md)
+- Face matching threshold is `0.5` (strict — minimises false positives)
+- Photos are **copied**, not moved — originals are always safe
+- Photos placed directly in the Events root (not inside a subfolder) are skipped
+- If a reference photo has no detectable face, that student is skipped with a warning
 
-## Screenshot walkthrough
+---
 
-### 1) App launch
+## Tech Stack
 
-![KinderSort launch](guidebook_assets/01_launch.png)
+[![face_recognition](https://img.shields.io/badge/face__recognition-dlib-red)](https://github.com/ageitgey/face_recognition)
+[![Pillow](https://img.shields.io/badge/Pillow-image_processing-yellow)](https://python-pillow.org/)
+[![tkinter](https://img.shields.io/badge/tkinter-GUI-lightblue)](https://docs.python.org/3/library/tkinter.html)
+[![PyInstaller](https://img.shields.io/badge/PyInstaller-packaging-purple)](https://pyinstaller.org/)
 
-### 2) Reference folder selected
+| Component | Library |
+|---|---|
+| Face recognition | `face_recognition` + `dlib` |
+| Image handling | `Pillow` |
+| GUI | `tkinter` (built-in) |
+| Packaging | `PyInstaller` |
+| Language | Python 3.10+ |
 
-![Reference folder selected](guidebook_assets/02_reference_selected.png)
+---
 
-### 3) Events folder selected
-
-![Events folder selected](guidebook_assets/03_events_selected.png)
-
-### 4) All folders ready
-
-![All folders set](guidebook_assets/04_all_folders_set.png)
-
-### 5) Sorting in progress
-
-![Sorting in progress](guidebook_assets/05_sorting_in_progress.png)
-
-### 6) Sorting complete summary
-
-![Sorting complete](guidebook_assets/06_sorting_complete.png)
-
-## Important behavior
-
-- Distance threshold is `0.5` (strict matching to reduce false positives).
-- Files are copied (not moved).
-- Photos directly in the Events root are skipped; photos should be inside event subfolders.
-- If reference photo has no face, that student is skipped with a warning.
-
-## Downloading the EXE
-
-Please download prebuilt Windows binaries from:
-
-- **Releases**: `https://github.com/lerlerchan/KinderSort/releases`
-
-We intentionally keep `.exe` files out of normal Git history to keep the repository lightweight.
-
-## Developer setup (from source)
+## Developer Setup
 
 ```bash
 python -m venv .venv
@@ -105,14 +139,5 @@ Build Windows executable:
 
 ```bash
 pyinstaller --onefile --windowed --name "KinderSort" main.py
+# Output: dist/KinderSort.exe
 ```
-
-## Tech stack
-
-- Python 3.10+
-- `face_recognition`
-- `dlib`
-- `Pillow`
-- `numpy`
-- `tkinter`
-- `PyInstaller`
