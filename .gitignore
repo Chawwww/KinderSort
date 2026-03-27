@@ -11,3 +11,5 @@ dist/
 # Windows packaging output
 WinInstaller/
 *.exe
+/Issues
+.claude/worktrees/vigorous-hellman/
