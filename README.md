@@ -55,6 +55,7 @@ Full illustrated teacher guide: [`guidebook.md`](guidebook.md)
 | 4. All folders ready | ![All folders set](guidebook_assets/04_all_folders_set.png) |
 | 5. Sorting in progress | ![Sorting in progress](guidebook_assets/05_sorting_in_progress.png) |
 | 6. Sorting complete | ![Sorting complete](guidebook_assets/06_sorting_complete.png) |
+| 7. Timer display during sorting | ![Sorting with timer](guidebook_assets/07_timerInclude.png) |
 
 ---
 
@@ -102,10 +103,11 @@ Output/
 
 ## Important Behaviour
 
-- Face matching threshold is `0.5` (strict — minimises false positives)
+- Face matching threshold is `0.55` (strict — minimises false positives)
 - Photos are **copied**, not moved — originals are always safe
 - Photos placed directly in the Events root (no subfolders) are also supported — the folder name is used as the event name
 - If a reference photo has no detectable face, that student is skipped with a warning
+- v1.1 uses higher-accuracy face recognition (CNN + multi-jitter) — sorting 500 photos typically takes **8–15 minutes** on a standard PC; the spinning timer shows progress so the app will not appear frozen
 
 ---
 

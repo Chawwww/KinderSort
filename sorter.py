@@ -31,7 +31,7 @@ class PhotoSorter:
         summary = sorter.sort_all(progress_cb, cancelled_cb)
     """
 
-    DISTANCE_THRESHOLD = 0.5
+    DISTANCE_THRESHOLD = 0.55
     """Maximum face distance to consider a match (lower = stricter)."""
 
     MAX_IMAGE_DIMENSION = 1000
@@ -55,11 +55,18 @@ class PhotoSorter:
     # Reference loading
     # ------------------------------------------------------------------
 
-    def load_references(self) -> list[str]:
+    def load_references(
+        self,
+        progress_callback: Callable[[int, int, str], None] | None = None,
+    ) -> list[str]:
         """Encode every reference photo and store by student name.
 
         Iterates over image files in reference_folder.  The student name is the
         filename stem (e.g. ``Ali.jpg`` → ``"Ali"``).
+
+        Args:
+            progress_callback: Optional callable with ``(current, total, name)``
+                called after each student is processed so the GUI can update.
 
         Returns:
             List of student names whose reference photo had no detectable face.
@@ -75,11 +82,17 @@ class PhotoSorter:
             self.logger.warning("No reference images found in %s", self.reference_folder)
             return no_face_names
 
-        for ref_path in reference_images:
+        total = len(reference_images)
+        for current, ref_path in enumerate(reference_images, start=1):
             student_name = ref_path.stem
+            if progress_callback:
+                progress_callback(current, total, student_name)
             try:
                 image = face_recognition.load_image_file(str(ref_path))
-                encodings = face_recognition.face_encodings(image)
+                locations = face_recognition.face_locations(image, model="cnn")
+                encodings = face_recognition.face_encodings(
+                    image, known_face_locations=locations, num_jitters=10, model="large"
+                )
 
                 if not encodings:
                     self.logger.warning(
@@ -162,8 +175,12 @@ class PhotoSorter:
                 continue
 
             try:
-                face_locations = face_recognition.face_locations(rgb_image)
-                face_encodings = face_recognition.face_encodings(rgb_image, face_locations)
+                face_locations = face_recognition.face_locations(rgb_image)  # HOG — fast
+                if not face_locations:
+                    face_locations = face_recognition.face_locations(rgb_image, model="cnn")  # CNN fallback
+                face_encodings = face_recognition.face_encodings(
+                    rgb_image, face_locations, num_jitters=3, model="large"
+                )
             except Exception as exc:  # noqa: BLE001
                 self.logger.error("Face detection failed for %s: %s", image_path.name, exc)
                 safe_copy(image_path, self.output_folder / "_unmatched", output_filename, self.logger)

@@ -6,6 +6,7 @@ background thread so the UI remains responsive during processing.
 """
 
 import threading
+import time
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -23,7 +24,7 @@ class KinderSortApp(tk.Tk):
     def __init__(self) -> None:
         """Initialise the window, build all widgets, and configure layout."""
         super().__init__()
-        self.title("KinderSort v1.0 — Student Photo Organiser")
+        self.title("KinderSort v1.1 — Student Photo Organiser")
         self.minsize(self.MIN_WIDTH, self.MIN_HEIGHT)
         self.resizable(True, True)
 
@@ -34,6 +35,12 @@ class KinderSortApp(tk.Tk):
 
         # Cancellation flag shared between GUI and worker thread
         self._cancel_flag = threading.Event()
+
+        # Spinner / elapsed timer state
+        self._spinner_frames = ["🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛"]
+        self._spinner_idx = 0
+        self._sort_start_time: float | None = None
+        self._ticker_id: str | None = None
 
         self._build_ui()
 
@@ -146,6 +153,11 @@ class KinderSortApp(tk.Tk):
         )
         self._status_label.pack(fill=tk.X)
 
+        self._timer_label = tk.Label(
+            progress_frame, text="", anchor="w", fg="#555555"
+        )
+        self._timer_label.pack(fill=tk.X)
+
     def _build_summary_box(self, parent: tk.Widget) -> None:
         """Build the read-only summary text box shown after completion."""
         summary_frame = tk.LabelFrame(parent, text="Summary", padx=8, pady=8)
@@ -167,7 +179,7 @@ class KinderSortApp(tk.Tk):
             string_var.set(folder)
 
     def _on_start(self) -> None:
-        """Validate inputs, load references synchronously, then launch sort thread."""
+        """Validate inputs then launch the worker thread for all heavy work."""
         ref = self._reference_var.get().strip()
         events = self._events_var.get().strip()
         output = self._output_var.get().strip()
@@ -195,38 +207,17 @@ class KinderSortApp(tk.Tk):
             messagebox.showerror("Output folder error", f"Cannot create output folder:\n{exc}")
             return
 
-        # Set up logger now that we have the output folder
-        logger = setup_logger(output_path)
-
-        sorter = PhotoSorter(ref_path, events_path, output_path, logger)
-
-        # Load references synchronously (fast, needs to show warnings)
-        self._set_status("Loading reference photos…")
-        self.update_idletasks()
-
-        skipped_names = sorter.load_references()
-
-        if skipped_names:
-            names_str = "\n".join(f"  • {n}" for n in skipped_names)
-            messagebox.showwarning(
-                "Reference photos without faces",
-                f"No face was detected in the reference photos for:\n\n{names_str}\n\n"
-                "These students will be skipped during sorting.",
-            )
-
-        if not sorter._student_encodings:
-            messagebox.showerror(
-                "No references loaded",
-                "No student faces could be loaded. Please check your Reference folder.",
-            )
-            return
-
-        # Disable start, enable cancel
+        # Disable start, enable cancel before launching thread
         self._start_btn.config(state=tk.DISABLED)
         self._cancel_btn.config(state=tk.NORMAL)
         self._cancel_flag.clear()
         self._clear_summary()
         self._progress_var.set(0)
+        self._set_status("Loading reference photos…")
+        self._start_ticker()
+
+        logger = setup_logger(output_path)
+        sorter = PhotoSorter(ref_path, events_path, output_path, logger)
 
         thread = threading.Thread(
             target=self._run_sorting, args=(sorter,), daemon=True
@@ -234,7 +225,22 @@ class KinderSortApp(tk.Tk):
         thread.start()
 
     def _run_sorting(self, sorter: PhotoSorter) -> None:
-        """Worker thread: run sort_all() and report back via after()."""
+        """Worker thread: load references, then sort all photos."""
+        try:
+            skipped_names = sorter.load_references(
+                progress_callback=self._on_ref_progress
+            )
+        except Exception as exc:  # noqa: BLE001
+            self.after(0, self._on_error, str(exc))
+            return
+
+        if skipped_names:
+            self.after(0, self._show_ref_warning, skipped_names)
+
+        if not sorter._student_encodings:
+            self.after(0, self._on_error, "No student faces could be loaded. Please check your Reference folder.")
+            return
+
         try:
             summary = sorter.sort_all(
                 progress_callback=self._on_progress,
@@ -243,6 +249,48 @@ class KinderSortApp(tk.Tk):
             self.after(0, self._on_done, summary)
         except Exception as exc:  # noqa: BLE001
             self.after(0, self._on_error, str(exc))
+
+    def _start_ticker(self) -> None:
+        """Start the spinning clock emoji and elapsed timer."""
+        self._sort_start_time = time.monotonic()
+        self._spinner_idx = 0
+        self._tick()
+
+    def _tick(self) -> None:
+        """Update spinner and elapsed time every 250 ms."""
+        if self._sort_start_time is None:
+            return
+        elapsed = int(time.monotonic() - self._sort_start_time)
+        minutes, seconds = divmod(elapsed, 60)
+        spinner = self._spinner_frames[self._spinner_idx % len(self._spinner_frames)]
+        self._spinner_idx += 1
+        self._timer_label.config(text=f"{spinner}  {minutes:02d}:{seconds:02d} elapsed")
+        self._ticker_id = self.after(250, self._tick)
+
+    def _stop_ticker(self, final_elapsed: int | None = None) -> None:
+        """Stop the spinner and show final elapsed time."""
+        if self._ticker_id:
+            self.after_cancel(self._ticker_id)
+            self._ticker_id = None
+        if final_elapsed is not None:
+            minutes, seconds = divmod(final_elapsed, 60)
+            self._timer_label.config(text=f"✅  Done in {minutes:02d}:{seconds:02d}")
+        else:
+            self._timer_label.config(text="")
+        self._sort_start_time = None
+
+    def _on_ref_progress(self, current: int, total: int, name: str) -> None:
+        """Called from worker thread after each reference photo is encoded."""
+        self.after(0, self._set_status, f"Loading references [{current}/{total}]: {name}…")
+
+    def _show_ref_warning(self, skipped_names: list[str]) -> None:
+        """Show warning dialog for reference photos with no detectable face."""
+        names_str = "\n".join(f"  • {n}" for n in skipped_names)
+        messagebox.showwarning(
+            "Reference photos without faces",
+            f"No face was detected in the reference photos for:\n\n{names_str}\n\n"
+            "These students will be skipped during sorting.",
+        )
 
     def _on_cancel(self) -> None:
         """Signal the worker thread to stop after the current image."""
@@ -266,6 +314,8 @@ class KinderSortApp(tk.Tk):
 
     def _on_done(self, summary: dict[str, int]) -> None:
         """Show summary and re-enable controls after successful completion."""
+        elapsed = int(time.monotonic() - self._sort_start_time) if self._sort_start_time else None
+        self._stop_ticker(final_elapsed=elapsed)
         self._start_btn.config(state=tk.NORMAL)
         self._cancel_btn.config(state=tk.DISABLED)
         self._progress_var.set(100)
@@ -294,6 +344,7 @@ class KinderSortApp(tk.Tk):
 
     def _on_error(self, message: str) -> None:
         """Show an error dialog and re-enable controls."""
+        self._stop_ticker()
         self._start_btn.config(state=tk.NORMAL)
         self._cancel_btn.config(state=tk.DISABLED)
         self._set_status("An error occurred.")
