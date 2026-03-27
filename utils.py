@@ -52,16 +52,27 @@ def collect_event_images(events_folder: Path) -> list[tuple[Path, str]]:
     """Walk immediate subfolders of events_folder and collect image paths.
 
     Returns a list of (image_path, event_name) tuples where event_name is the
-    name of the immediate subfolder containing the image. Files placed directly
-    in events_folder root (no subfolder) are skipped intentionally.
+    name of the immediate subfolder containing the image.
+
+    If no images are found in subfolders (e.g. the user selected an event folder
+    directly rather than its parent), falls back to scanning images placed directly
+    in events_folder root, using the folder name as the event name.
     """
     results: list[tuple[Path, str]] = []
 
     for item in sorted(events_folder.iterdir()):
         if not item.is_dir():
-            continue  # Skip files in root — no event_name to assign
+            continue
         event_name = item.name
         for image_path in sorted(item.rglob("*")):
+            if image_path.is_file() and is_image_file(image_path):
+                results.append((image_path, event_name))
+
+    # Fallback: if no images found in subfolders, scan root of events_folder directly.
+    # This handles the case where the user selects a single event folder (flat structure).
+    if not results:
+        event_name = events_folder.name
+        for image_path in sorted(events_folder.iterdir()):
             if image_path.is_file() and is_image_file(image_path):
                 results.append((image_path, event_name))
 

@@ -284,6 +284,14 @@ class KinderSortApp(tk.Tk):
         ]
         self._write_summary("\n".join(lines))
 
+        if summary["total"] == 0:
+            messagebox.showwarning(
+                "No images found",
+                "No photos were found in the Events folder.\n\n"
+                "Make sure your Events folder contains photos (or sub-folders with photos).\n"
+                "Supported formats: .jpg  .jpeg  .png  .bmp  .webp",
+            )
+
     def _on_error(self, message: str) -> None:
         """Show an error dialog and re-enable controls."""
         self._start_btn.config(state=tk.NORMAL)
