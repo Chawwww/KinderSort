@@ -23,7 +23,7 @@ class KinderSortApp(tk.Tk):
     def __init__(self) -> None:
         """Initialise the window, build all widgets, and configure layout."""
         super().__init__()
-        self.title("KinderSort — Student Photo Organiser")
+        self.title("KinderSort v1.0 — Student Photo Organiser")
         self.minsize(self.MIN_WIDTH, self.MIN_HEIGHT)
         self.resizable(True, True)
 

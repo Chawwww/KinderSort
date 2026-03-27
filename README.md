@@ -104,7 +104,7 @@ Output/
 
 - Face matching threshold is `0.5` (strict — minimises false positives)
 - Photos are **copied**, not moved — originals are always safe
-- Photos placed directly in the Events root (not inside a subfolder) are skipped
+- Photos placed directly in the Events root (no subfolders) are also supported — the folder name is used as the event name
 - If a reference photo has no detectable face, that student is skipped with a warning
 
 ---
