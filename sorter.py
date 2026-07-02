@@ -88,7 +88,10 @@ class PhotoSorter:
             if progress_callback:
                 progress_callback(current, total, student_name)
             try:
-                image = face_recognition.load_image_file(str(ref_path))
+                # Resize before running the CNN detector — full-resolution phone
+                # photos can make dlib's CNN model take minutes per image and
+                # block the GIL (freezing the whole app) if left unresized.
+                image = self._load_and_resize(ref_path)
                 locations = face_recognition.face_locations(image, model="cnn")
                 encodings = face_recognition.face_encodings(
                     image, known_face_locations=locations, num_jitters=10, model="large"
