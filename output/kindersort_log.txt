@@ -77,3 +77,4 @@
 2026-07-02 13:20:48 [DEBUG] Copied photo image 3.jpeg → C:\Users\zhenh\KinderSort\output\gradmother\photo event__photo image 3.jpeg
 2026-07-02 13:20:48 [INFO] Matched photo image 3.jpeg → gradmother
 2026-07-02 13:20:48 [INFO] Sort complete — total=9 matched=9 unmatched=0 skipped=0
+2026-07-15 11:34:11 [WARNING] No reference images found in C:\Users\zhenh\KinderSort\referencePhoto

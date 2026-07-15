@@ -1,4 +1,4 @@
 face_recognition==1.3.0
-dlib==19.24.1   # 你已经安装好的版本
+dlib==19.24.1   
 Pillow==10.3.0
 numpy>=2.0
