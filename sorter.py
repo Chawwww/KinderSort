@@ -514,4 +514,5 @@ class PhotoSorter:
             return names[best_idx]
 
         self.logger.debug("No match — best distance=%.4f", best_distance)
-        return None
+        return None#   v 1 . 2      e m b e d d i n g   c a c h e   +   f a c e   a l i g n m e n t  
+ 
